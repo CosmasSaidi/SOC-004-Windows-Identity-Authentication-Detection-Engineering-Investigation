@@ -1,0 +1,68 @@
+SOC-004 — Evidence Review (forensic, evidence-only)
+Source files: SOC-004-controlled-auth-scenario.txt, SOC-004-clean-precollection-baseline.txt, SOC-004-normal-ws001-auth.txt
+No new collection performed.
+
+1. Executive finding
+The successful SOC004-Test01 authentication is well-attributed in DC1 telemetry via Kerberos (4768/4769/4624) from 192.168.56.102. The three failed attempts are confirmed by execution output (22:29:54, 22:30:13, 22:30:16) but are NOT represented by 4625/4776/4771 events in the collected DC1 windows; only ANONYMOUS LOGON 4624 events from 192.168.56.102 were observed.
+
+2. Failed authentication evidence
+Phase A execution output (from WS001) shows:
+- 22:29:54 SOC004-Test01 FAILED "The specified network password is not correct"
+- 22:30:13 SOC004-Test02 FAILED "The specified network password is not correct"
+- 22:30:16 SOC004-Test03 FAILED "The specified network password is not correct"
+DC1 telemetry in windows 22:29:00-22:31:00 and 22:30:00-22:33:00 did not contain 4625, 4771, or target-account 4776 events for Test01/02/03. One 4776 for Administrator (Status 0x0) was observed at 22:29:06 and 22:30:07/22:30:25, attributed to collection/admin activity, not the test accounts.
+
+3. Successful authentication evidence
+At 22:30:11: 4768 RecordId 54528 SOC004-Test01 Status 0x0, IpAddress ::ffff:192.168.56.102.
+At 22:30:11: 4769 RecordId 54529/54530 SOC004-Test01@SOC002.LOCAL Status 0x0, IpAddress ::ffff:192.168.56.102.
+At 22:30:11: 4624 RecordId 54531 SOC004-Test01, LogonType 3, Kerberos, WorkstationName -, IpAddress 192.168.56.102, Status N/A.
+Post-auth at 22:30:55: SYSVOL listing succeeded.
+
+4. Anonymous 4624 analysis
+ANONYMOUS LOGON 4624 events from 192.168.56.102 (WorkstationName SOC002-WS001) were observed at 22:29:08 (RecordId 54506), 22:29:26 (54508), 22:29:29 (54510), 22:30:08 (54526). These are NTLM, LogonType 3, WorkstationName SOC002-WS001, IpAddress 192.168.56.102. They likely represent SMB session setup/anonymous access during the failed New-PSDrive attempts, but this is NOT VERIFIED as one-to-one with the three failed attempts.
+
+5. DC1 ↔ WS001 correlation
+Source IP 192.168.56.102 corresponds to WS001 (confirmed via guest properties). The successful Test01 events carry this IP. The ANONYMOUS LOGON events also carry this IP. WS001-side event logs were not collected.
+
+6. Authentication protocol analysis
+Successful Test01: Kerberos (TGT 4768, service ticket 4769, 4624 LogonType 3 Kerberos).
+Failed attempts: execution used NTLM-backed New-PSDrive; DC1 telemetry shows ANONYMOUS LOGON (NTLM) from WS001 but no target-account 4625. Protocol for the failed account attempts is not conclusively established in DC1 telemetry.
+
+7. Timeline
+22:29:54 Test01 failed (client-side)
+22:30:08 ANONYMOUS LOGON 4624 from WS001
+22:30:13 Test02 failed (client-side)
+22:30:16 Test03 failed (client-side)
+22:30:26, 22:29:29 ANONYMOUS LOGON 4624 from WS001
+22:30:11 Test01 Kerberos TGT/service ticket/4624
+22:30:55 Test01 successful SYSVOL access
+
+8. Observed
+- 3 failed attempts occurred on WS001 (client output).
+- Successful Test01 authentication occurred and is represented in DC1 telemetry.
+- ANONYMOUS LOGON 4624 events from 192.168.56.102 occurred.
+- No 4625/4771/4740 observed in collected windows.
+
+9. Inferred
+- The ANONYMOUS LOGON events may be related to the failed SMB authentication attempts. This is an inference, not verified.
+
+10. Not verified
+- Whether the three failed attempts generated 4625 events on DC1 (not observed in queried windows).
+- One-to-one mapping of ANONYMOUS LOGON events to the three failed attempts.
+- Whether any 4776 events for Test01/02/03 occurred (not observed).
+- WS001-side event log evidence (not collected).
+
+11. Telemetry gaps
+- 4625 not captured in queried windows.
+- 4776 for test accounts not captured.
+- 4771 not observed (none in window).
+- WS001 local Security log not collected.
+
+12. Detection implications
+CANDIDATE: Kerberos 4768/4769/4624 sequence for a new test account from 192.168.56.102.
+CANDIDATE: ANONYMOUS LOGON 4624 from 192.168.56.102 followed by successful account authentication.
+CANDIDATE: Multiple authentication attempts from same source IP in short time window.
+No detections created. No labels applied.
+
+13. Recommended next lab action
+Collect WS001 Security log evidence for the same time window and re-query DC1 with a wider time range to locate any delayed 4625/4776 events. Do not generate new authentication attempts.

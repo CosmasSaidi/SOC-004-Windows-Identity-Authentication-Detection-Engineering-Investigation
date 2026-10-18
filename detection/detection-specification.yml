@@ -1,0 +1,69 @@
+title: SOC004 - Kerberos Pre-Authentication Failure (Single Event)
+status: experimental
+description: >
+  Detects a single Windows Security Event ID 4771 (Kerberos pre-authentication failed)
+  for investigation. A single event does not establish password spraying, brute force,
+  or credential compromise.
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4771
+  condition: selection
+fields:
+  - TimeCreated
+  - TargetUserName
+  - TargetDomainName
+  - IpAddress
+  - WorkstationName
+  - FailureCode
+  - RecordId
+  - ProviderName
+  - MachineName
+falsepositives:
+  - Incorrect password entry by legitimate user
+  - Cached credential mismatch
+  - Clock skew or Kerberos configuration issues
+  - Service account misconfiguration
+level: low
+att&ck:
+  technique: T1110
+  status: candidate
+  confirmed: false
+limitations:
+  - Single event is informational only.
+  - Does not prove password spraying or compromise.
+  - Requires correlation and additional evidence for classification.
+---
+title: SOC004 - Repeated Kerberos Pre-Authentication Failures (Correlation)
+status: experimental
+description: >
+  Correlation analytic for repeated 4771 failures. These thresholds are PROPOSED ENGINEERING HYPOTHESES ONLY.
+  They were not empirically validated by the available dataset and must not be interpreted as industry-standard or production-validated thresholds.
+  Rules are DISABLED until empirically validated with sufficient telemetry.
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4771
+  condition: selection
+fields:
+  - TimeCreated
+  - TargetUserName
+  - IpAddress
+  - FailureCode
+  - RecordId
+falsepositives:
+  - Multiple users sharing a source IP (NAT, terminal server)
+  - Automated service retries
+  - Misconfigured clients
+level: medium
+att&ck:
+  technique: T1110
+  status: candidate
+  confirmed: false
+limitations:
+  - Thresholds not empirically validated by the available dataset (NOT VALIDATED / DISABLED).
+  - Requires baseline tuning.

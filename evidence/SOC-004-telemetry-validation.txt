@@ -1,0 +1,33 @@
+SOC-004 — Telemetry Validation
+Execution: one controlled failed authentication using SOC004-Test01 from WS001, intentionally incorrect password.
+Timestamp: 2026-10-18 22:36:56 (client) / 22:36:10 (DC1 4771).
+Method: New-PSDrive to \\SOC002-DC1\SYSVOL with wrong password (NTLM/Kerberos path resulted in Kerberos pre-auth failure).
+
+1. Test objective
+Validate whether enabling Credential Validation and Kerberos Authentication Service Failure auditing captures the failed authentication.
+
+2. Execution timestamp
+Client: 2026-10-18 22:36:56. DC1 4771: 2026-10-18 22:36:10.
+
+3. Authentication method
+NTLM-backed SMB session setup triggered Kerberos pre-authentication failure (4771) for SOC004-Test01.
+
+4. DC1 events observed
+- 4771 RecordId 54525? (see output) TimeCreated 22:36:10, EventID 4771, TargetUserName SOC004-Test01, Failure Code 0x18 (bad password), Client Address ::ffff:192.168.56.102, Client Port 49786.
+- 4624 RecordId 54526: ANONYMOUS LOGON, NTLM, WorkstationName SOC002-WS001, IpAddress 192.168.56.102, LogonType 3.
+No 4625, 4776, 4768, 4769 observed in window for Test01.
+
+5. WS001 events observed
+WS001 Security log 22:36:00-22:38:00: 2 events, both 4624. No 4625/4771/4776/4768/4769.
+
+6. Correlation
+The 4771 for SOC004-Test01 at 22:36:10 from ::ffff:192.168.56.102 corresponds to the controlled failed attempt. The ANONYMOUS LOGON 4624 at 22:36:10 from 192.168.56.102 (WorkstationName SOC002-WS001) also corresponds.
+
+7. Result: VERIFIED
+The failed authentication is now captured on DC1 as Event ID 4771 (Kerberos pre-authentication failed), Failure Code 0x18, source IP 192.168.56.102 (WS001), TargetUserName SOC004-Test01.
+
+8. Evidence limitations
+- No 4625 or 4776 was generated for this attempt.
+- WS001 did not record a local 4625.
+- Only one attempt was performed; no retry.
+- No interpretation or detection created.

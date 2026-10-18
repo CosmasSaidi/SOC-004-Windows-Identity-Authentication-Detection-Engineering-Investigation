@@ -1,0 +1,9 @@
+SOC-004 — Detection Validation
+Analytic tested: Single-event analytic (EventID=4771).
+Query/logic used: EventID = 4771 (Security log).
+Event matched: SOC004-Test01, TimeCreated 2026-10-18 22:36:10, FailureCode 0x18, IpAddress 192.168.56.102, MachineName SOC002-DC1.soc002.local.
+Fields extracted: TimeCreated, EventID, TargetUserName, TargetDomainName (not captured), IpAddress, FailureCode, ProviderName, MachineName. RecordId not captured in filtered extraction.
+Expected result: Single 4771 event detected.
+Actual result: VERIFIED — one 4771 event for SOC004-Test01 was observed and matches the single-event analytic.
+Correlation analytic: Threshold not validated due to insufficient naturally occurring test telemetry. Only one 4771 event exists in the available data; no repeated failures occurred.
+Limitations: Single-event only; no correlation threshold validation; no additional event generation performed.

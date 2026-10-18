@@ -1,0 +1,62 @@
+SOC-004 — Controlled Authentication Scenario Report
+
+1. Scenario objective
+Generate a small, clearly attributable authentication sequence from SOC002-WS001 against SOC002-DC1 using dedicated SOC004 test accounts only.
+
+2. Execution timestamps
+Phase A failed attempts: 2026-10-18 22:29:54 (Test01), 22:30:13 (Test02), 22:30:16 (Test03).
+Phase C successful auth: 2026-10-18 22:30:55 (SOC004-Test01).
+Phase D post-auth: SYSVOL listing (soc002.local) succeeded.
+
+3. Phase A — failed authentication
+Method: New-PSDrive to \\SOC002-DC1\SYSVOL with intentionally incorrect password, from WS001. Exactly 3 attempts (one per test account). All failed with "The specified network password is not correct". No retries.
+
+4. Phase B — telemetry
+Window 22:29:00-22:31:00. Total 6 events: 4776=1, 4769=1, 4624=4. No 4625/4768/4771/4740 observed in this window. Observed 4624 ANONYMOUS LOGON events from 192.168.56.102 (WorkstationName SOC002-WS001), plus Administrator 4776 and WS001 4769.
+
+5. Phase C — successful authentication
+SOC004-Test01 authenticated successfully to \\SOC002-DC1\SYSVOL at 22:30:55. Mechanism: Kerberos (4768 TGT, 4769 service ticket, 4624 LogonType 3).
+
+6. Phase D — post-authentication activity
+Benign read-only Get-ChildItem on Z:\ (SYSVOL) succeeded; returned soc002.local. No modifications made.
+
+7. Phase E — final telemetry
+Window 22:30:00-22:33:00. Total 13 events: 4776=2, 4624=8, 4768=1, 4769=2.
+Relevant events:
+- 4768 RecordId 54528: SOC004-Test01, Status 0x0, IpAddress ::ffff:192.168.56.102, TimeCreated 22:30:11
+- 4769 RecordId 54529/54530: SOC004-Test01@SOC002.LOCAL, Status 0x0, IpAddress ::ffff:192.168.56.102
+- 4624 RecordId 54531: SOC004-Test01, LogonType 3, Kerberos, WorkstationName -, IpAddress 192.168.56.102
+- 4624 RecordId 54526: ANONYMOUS LOGON, NTLM, WorkstationName SOC002-WS001, IpAddress 192.168.56.102
+- 4776 RecordId 54525: Administrator, Status 0x0
+- 4776 RecordId 54547: Administrator, Status 0x0
+- 4624 RecordId 54549: Administrator, NTLM, WorkstationName KALI
+
+8. Event correlation
+The successful Test01 authentication is represented by 4768/4769/4624 from 192.168.56.102 (WS001). The failed attempts are not represented by 4625 events in the collected windows; instead ANONYMOUS LOGON 4624 events from 192.168.56.102 were observed. The three separate failed attempts are distinguishable by timestamps (22:29:54, 22:30:13, 22:30:16) in Phase A execution output, but not as three distinct 4625 events in DC1 telemetry.
+
+9. Observed evidence
+- Kerberos mechanism used for successful Test01 auth (4768/4769/4624).
+- NTLM/ANONYMOUS LOGON events from WS001 during failed attempts.
+- Source IP 192.168.56.102 (WS001) observed.
+- Post-auth SYSVOL listing succeeded.
+
+10. Inferences
+None beyond observed telemetry. No attack/purpose labels applied.
+
+11. Not verified
+- Whether the three failed attempts generated 4625 on DC1 (not observed in collected windows).
+- Whether ANONYMOUS LOGON events correspond one-to-one to the failed attempts.
+- No 4740 (account lockout) observed.
+
+12. Detection opportunities
+CANDIDATE: Kerberos 4768/4769/4624 sequence for a new test account from a workstation IP.
+CANDIDATE: ANONYMOUS LOGON 4624 events from a workstation IP followed by successful account authentication.
+CANDIDATE: Multiple authentication attempts from same source IP in short time window.
+No detections created.
+
+13. Limitations
+- Telemetry collection windows may not have captured all events.
+- 4625 events for the failed attempts were not observed in the queried windows.
+- No WS001-side event log collection was performed.
+
+STOP. No further action.

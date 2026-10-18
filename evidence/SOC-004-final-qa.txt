@@ -1,0 +1,50 @@
+SOC-004 FINAL QA REPORT
+
+QA status: PASS
+
+Files verified:
+- /home/saidi/soc-lab/SOC-004-detection-specification.yml
+- /home/saidi/soc-lab/SOC-004-detection-engineering.md
+- /home/saidi/soc-lab/SOC-004-detection-tuning-assessment.md
+- /home/saidi/soc-lab/SOC-004-final-investigation-report.md
+- /home/saidi/soc-lab/SOC-004-evidence-index.md
+- /home/saidi/soc-lab/SOC-004-telemetry-validation.txt
+- /home/saidi/soc-lab/SOC-004-detection-validation.txt
+- /home/saidi/soc-lab/SOC-004-telemetry-gap-analysis.txt
+- /home/saidi/soc-lab/SOC-004-evidence-review.txt
+- /home/saidi/soc-lab/SOC-004-controlled-auth-scenario.txt
+
+Consistency checks:
+- Public title/subtitle consistent across report and tuning assessment (Windows Identity & Authentication Detection Engineering & Investigation; Kerberos telemetry, Event ID 4771, detection validation, evidence-driven investigation).
+- T1110 (Brute Force): CANDIDATE ONLY / NOT CONFIRMED in all detection-facing docs. detection-specification.yml uses att&ck with technique T1110, status candidate, confirmed false.
+- Correlation A: Same source IP → >=3 distinct TargetUserName values → within 5 minutes — PROPOSED ENGINEERING HYPOTHESIS ONLY / NOT VALIDATED / DISABLED / EXPERIMENTAL. Consistently >=3.
+- Correlation B: Same TargetUserName → >=3 Event ID 4771 failures → within 5 minutes — PROPOSED ENGINEERING HYPOTHESIS ONLY / NOT VALIDATED / DISABLED / EXPERIMENTAL. Consistently >=3.
+- 4740 escalation: PROPOSED / NOT VALIDATED / DISABLED / EXPERIMENTAL (documented in tuning assessment).
+- Single-event 4771 detection: VALIDATED as validated detection/rule match (SOC004-Test01 22:36:10, Failure Code 0x18, 192.168.56.102/SOC002-WS001).
+- Detection status: EXPERIMENTAL. Correlation rules DISABLED until empirically validated.
+- Final disposition: BENIGN / EXPECTED — CLOSED (unchanged).
+- No statement claims correlation thresholds were empirically validated. Explicit text: “These thresholds were not empirically validated by the available dataset and must not be interpreted as industry-standard or production-validated thresholds.”
+- No statement claims single 4771 proves brute force, password spraying, credential compromise, or persistence.
+- Audit-policy wording: technically precise (“enabled failure auditing for Kerberos Authentication Service, allowing the subsequent Kerberos pre-authentication failure to be recorded as Event ID 4771”) — no implication audit policy caused failure itself.
+- “True positive” terminology removed; replaced with “validated detection/rule match”. Rule match explained; underlying activity classified BENIGN/EXPECTED (controlled telemetry-validation exercise).
+- NTLM/SMB telemetry blind spot documented (earlier attempts 22:29:54/22:30:13/22:30:16 produced no 4625/4771/4776 for test accounts in queried windows; WS001 endpoint telemetry limited/partially inspected).
+- Audit-policy dependency documented.
+- Endpoint telemetry limitation documented.
+- Distinctions preserved: OBSERVED, INFERRED, CANDIDATE, NOT VERIFIED, VALIDATED, NOT VALIDATED intact across evidence index and narrative.
+
+Evidence index:
+- References all relevant existing SOC-004 artifacts; all listed files exist in /home/saidi/soc-lab.
+
+Contradictions:
+- None found between final investigation report, detection tuning assessment, detection engineering/spec, and evidence index.
+
+Git status summary:
+- /home/saidi/soc-lab has no .git repository (not a git repo). SOC-004 artifacts in this directory are untracked by git.
+- /home/saidi/soc-lab/soc-003 is a separate git repository; contains unrelated untracked files (evidence/phase1-zeek-baseline/*). No SOC-004 files present/modified there.
+- No SOC-004 files modified/staged; no commits/pushes performed. No Git configuration changes.
+
+Confirmation:
+- No new telemetry was generated.
+- No SOC configuration was changed (no AD/user/group/password/domain changes; no audit policy changes; no WEF/Sysmon/firewall/endpoint configuration changes; no new events intentionally created; scenario not rerun).
+
+Final QA result: PASS

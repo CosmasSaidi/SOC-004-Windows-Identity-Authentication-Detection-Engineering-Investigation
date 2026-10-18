@@ -1,0 +1,63 @@
+/usr/lib/python3/dist-packages/spnego/_ntlm_raw/crypto.py:46: CryptographyDeprecationWarning: ARC4 has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.ARC4 and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 48.0.0.
+  arc4 = algorithms.ARC4(self._key)
+SOC-004 - Test Identity Creation (authorized isolated lab)
+Collection time: 2026-10-18 21:55:57
+
+=== Domain Password Policy ===
+
+
+ComplexityEnabled           : True
+DistinguishedName           : DC=soc002,DC=local
+LockoutDuration             : 00:30:00
+LockoutObservationWindow    : 00:30:00
+LockoutThreshold            : 0
+MaxPasswordAge              : 42.00:00:00
+MinPasswordAge              : 1.00:00:00
+MinPasswordLength           : 7
+objectClass                 : {domainDNS}
+objectGuid                  : f8ae9e66-108a-4f75-90b3-e96fab88f52b
+PasswordHistoryCount        : 24
+ReversibleEncryptionEnabled : False
+
+
+
+
+=== Pre-creation user list ===
+
+SamAccountName Name          Enabled
+-------------- ----          -------
+Administrator  Administrator    True
+Guest          Guest           False
+krbtgt         krbtgt          False
+
+
+
+=== Creating test users ===
+Created: SOC004-Test01
+Created: SOC004-Test02
+Created: SOC004-Test03
+
+=== Verification ===
+SamAccountName: SOC004-Test01
+Enabled: True
+DistinguishedName: CN=SOC004-Test01,CN=Users,DC=soc002,DC=local
+GroupMembership: Domain Users
+Privileged membership: none
+---
+SamAccountName: SOC004-Test02
+Enabled: True
+DistinguishedName: CN=SOC004-Test02,CN=Users,DC=soc002,DC=local
+GroupMembership: Domain Users
+Privileged membership: none
+---
+SamAccountName: SOC004-Test03
+Enabled: True
+DistinguishedName: CN=SOC004-Test03,CN=Users,DC=soc002,DC=local
+GroupMembership: Domain Users
+Privileged membership: none
+---
+No failed authentication attempts were generated.
+No existing accounts were modified.
+Password-spray simulation has NOT started.
+
+[RC]=0
